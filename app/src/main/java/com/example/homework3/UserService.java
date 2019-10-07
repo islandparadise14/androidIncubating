@@ -11,7 +11,7 @@ import retrofit2.http.Part;
 public interface UserService {
     @Multipart
     @POST("/users")
-    Call<DefaultResponse> apply(@Part("data") User user, @Part MultipartBody.Part profile);
+    Observable<DefaultResponse> apply(@Part("data") User user, @Part MultipartBody.Part profile);
 
     @POST("/sign")
     Observable<LoginResponse> signIn(@Body User user);

@@ -5,24 +5,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.homework3.util.SharedPreferenceUtil;
 
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText loginId;
     private EditText loginPassword;
     private Button loginButton;
+
+    public String TAG = "LoginError";
 
 
 
@@ -50,21 +47,21 @@ public class LoginActivity extends AppCompatActivity {
     void setListener() {
         loginButton.setOnClickListener(v -> {
             UserService userService = RetrofitUtil.retrofit.create(UserService.class);
-            userService.login(new User(loginId.getText().toString(), loginPassword.getText().toString()))
-                    .subscribeOn(Scheduler.io())
+            userService.signIn(new User(loginId.getText().toString(), loginPassword.getText().toString()))
+                    .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(LoginResponse ->{
+                    .subscribe(LoginResponse -> {
                         String token = LoginResponse.getAuth().getToken();
                         SharedPreferenceUtil.setStringValue("token", token);
                         navigateToMain();
                     }, t -> {
                         Log.e(TAG, "error type : "+t.getLocalizedMessage());
-                    })
+                    });
         });
     }
 
     void navigateToMain(){
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, Main2Activity.class);
         startActivity(intent);
     }
 }

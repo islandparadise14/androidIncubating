@@ -4,6 +4,7 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.database.Cursor;
+import android.database.Observable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,8 @@ import com.bumptech.glide.Glide;
 import java.io.File;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,24 +64,17 @@ public class RegisterActivity extends AppCompatActivity {
         button.setOnClickListener(v -> {
             File file = new File(getRealPathFromUri(uri));
             UserService userService = RetrofitUtil.retrofit.create(UserService.class);
-            Log.d("test","1");
-            Call<DefaultResponse> call = userService.apply(new User(idEditText.getText().toString(), editPassword.getText().toString()),
-                    RetrofitUtil.createMultipartBody(file,"profile"));
-
-            call.enqueue(new Callback<DefaultResponse>() {
-                @Override
-                public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-                    if(response.body().getResult().getSuccess().equals("true")) {
-                        Toast.makeText(getApplicationContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<DefaultResponse> call, Throwable t) {
-                    Log.e("error", t.getLocalizedMessage());
-                }
-            });
+            userService.apply(new User(idEditText.getText().toString(), editPassword.getText().toString()), RetrofitUtil.createMultipartBody(file, "profile"))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(DefaultResponse ->{
+                        if(DefaultResponse.getResult().getSuccess().equals("true")) {
+                            Toast.makeText(getApplicationContext(), "회원가입 성공!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }, t -> {
+                        Log.e("error", t.getLocalizedMessage());
+                    });
         });
     }
 
