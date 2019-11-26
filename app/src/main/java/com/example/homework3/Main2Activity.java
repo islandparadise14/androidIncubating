@@ -22,8 +22,6 @@ public class Main2Activity extends AppCompatActivity {
 
     private void init() {
         floatingActionButton = findViewById(R.id.diary_add);
-        String diaryNumber = SharedPreferenceUtil.getString("autoIncrementNumber");
-        if (diaryNumber.equals("")){ SharedPreferenceUtil.setStringValue("autoIncrementNumber", "1"); }
     }
 
     private void setListener() {

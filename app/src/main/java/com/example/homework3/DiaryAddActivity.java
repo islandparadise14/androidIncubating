@@ -1,6 +1,10 @@
 package com.example.homework3;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.homework3.databinding.ActivityDiaryAddBinding;
 import com.example.homework3.util.SharedPreferenceUtil;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -18,41 +23,32 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DiaryAddActivity extends AppCompatActivity {
-    EditText title;
-    EditText content;
-    Button submitButton;
+    DiaryAddViewModel mViewmodel;
+    ActivityDiaryAddBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_diary_add);
         init();
-        setListener();
+        observeViewModel();
     }
 
     private void init() {
-        title = findViewById(R.id.titleText);
-        content = findViewById(R.id.contentText);
-        submitButton = findViewById(R.id.diary_submit_button);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_diary_add);
+        mViewmodel = ViewModelProviders.of(this).get(DiaryAddViewModel.class);
+        mBinding.setViewModel(mViewmodel);
     }
 
-    private void setListener() {
-        submitButton.setOnClickListener(v -> {
-            DiaryService diaryService = RetrofitUtil.retrofit.create(DiaryService.class);
-            diaryService.addDiary(SharedPreferenceUtil.getString("token"), new Diary(title.getText().toString(), content.getText().toString(),SharedPreferenceUtil.getString("username")))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(DefaultResponse -> {
-                        Log.d("error", DefaultResponse.getResult().getMessage());
-                        if(DefaultResponse.getResult().getSuccess().equals("true")) {
-                            Toast.makeText(getApplicationContext(), DefaultResponse.getResult().getMessage(), Toast.LENGTH_LONG).show();
-                            finish();
-                        }
-                        Toast.makeText(getApplicationContext(), DefaultResponse.getResult().getMessage(), Toast.LENGTH_LONG).show();
-                        Log.e("error","error1");
-                    }, t -> {
-                        Log.e("error","error");
-                    });
+    private void observeViewModel() {
+        mViewmodel.onSubmitButtonClicked.observe(this, aVoid ->
+                mViewmodel.Submit(mBinding.titleText.getText().toString(), mBinding.contentText.getText().toString())
+        );
+        mViewmodel.finishSubmitSuccessCallback.observe(this, aVoid -> {
+            finish();
+        });
+        mViewmodel.mToastMessage.observe(this, s -> Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show());
+        mViewmodel.finishSubmitFailCallback.observe(this, aVoid -> {
+            finish();
         });
     }
 }
