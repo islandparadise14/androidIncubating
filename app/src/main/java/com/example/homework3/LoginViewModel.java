@@ -1,6 +1,7 @@
 package com.example.homework3;
 
 import android.app.Application;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 
@@ -8,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.example.homework3.util.SharedPreferenceUtil;
+import com.google.gson.JsonParser;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -29,6 +31,7 @@ public class LoginViewModel extends AndroidViewModel {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(LoginResponse -> {
                     String token = LoginResponse.getAuth().getToken();
+                    SharedPreferenceUtil.setStringValue("username", email);
                     SharedPreferenceUtil.setStringValue("token", token);
                     loginFinishCallBack.call();
                 }, t -> {

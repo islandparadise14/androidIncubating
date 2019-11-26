@@ -17,7 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitUtil {
     public static Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://purplebeen.kr:3000")
+            .baseUrl("http://45.76.184.135:3000")
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build();
@@ -37,7 +37,7 @@ public class RetrofitUtil {
 
         OkHttpClient client = httpClient.build();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://purplebeen.kr:3000")
+                .baseUrl("http://45.76.184.135:3000")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
